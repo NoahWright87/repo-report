@@ -1,0 +1,55 @@
+/* Global app styles */
+
+/* Markdown content */
+.rr-markdown { line-height: 1.6; }
+.rr-markdown h1, .rr-markdown h2, .rr-markdown h3,
+.rr-markdown h4, .rr-markdown h5, .rr-markdown h6 {
+  margin: 1.25em 0 0.5em;
+}
+.rr-markdown p { margin: 0.75em 0; }
+.rr-markdown ul, .rr-markdown ol { padding-left: 1.5em; margin: 0.5em 0; }
+.rr-markdown li { margin: 0.25em 0; }
+.rr-markdown code {
+  font-family: ui-monospace, "Cascadia Code", Menlo, monospace;
+  font-size: 0.875em;
+  background: var(--surface-raised, rgba(255,255,255,0.07));
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+}
+.rr-markdown pre {
+  background: var(--surface-raised, rgba(255,255,255,0.07));
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+.rr-markdown pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.rr-markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+.rr-markdown th, .rr-markdown td {
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  padding: 0.4em 0.75em;
+  text-align: left;
+}
+.rr-markdown th { background: var(--surface-raised, rgba(255,255,255,0.07)); }
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Ensure the layout takes full viewport */
+.nw-layout {
+  min-height: 100vh;
+}

@@ -1,0 +1,49 @@
+.rr-contributors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.rr-contributor-card {
+  text-align: center;
+}
+
+.rr-contributor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.rr-contributor__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rr-contributor__stats {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.rr-contributor__stat-label {
+  font-size: var(--text-xs);
+  color: var(--foreground);
+  opacity: 0.6;
+}
+
+.rr-contributor__lines {
+  font-size: var(--text-sm);
+}
+
+.rr-contributor__added {
+  color: var(--confirm);
+  font-weight: 600;
+}
+
+.rr-contributor__removed {
+  color: var(--danger);
+  font-weight: 600;
+}

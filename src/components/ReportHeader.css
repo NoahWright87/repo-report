@@ -1,0 +1,85 @@
+/* Home link in header left slot */
+.rr-header-home-link {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 150ms ease, background 150ms ease;
+  white-space: nowrap;
+}
+
+.rr-header-home-link:hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+/* Nav row in header center */
+.rr-report-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Shared base for nav buttons */
+.rr-report-nav__arrow-btn,
+.rr-report-nav__title-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 120ms ease, opacity 120ms ease;
+  font-family: inherit;
+  color: var(--foreground);
+}
+
+.rr-report-nav__arrow-btn:focus-visible,
+.rr-report-nav__title-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Prev / next arrow buttons */
+.rr-report-nav__arrow-btn {
+  padding: 4px 8px;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.rr-report-nav__arrow-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+  opacity: 1;
+}
+
+.rr-report-nav__arrow-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* Title / dropdown trigger */
+.rr-report-nav__title-btn {
+  gap: 5px;
+  padding: 4px 10px;
+  max-width: 360px;
+}
+
+.rr-report-nav__title-btn:hover {
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.rr-report-nav__title-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rr-report-nav__caret {
+  font-size: 0.6em;
+  flex-shrink: 0;
+  opacity: 0.55;
+}

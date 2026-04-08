@@ -1,0 +1,33 @@
+.rr-qa {
+  text-align: center;
+}
+
+.rr-qa__contact {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-lg) auto 0;
+  max-width: 520px;
+  text-align: left;
+}
+
+.rr-qa__contact li {
+  font-size: var(--text-lg, 1.125rem);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.rr-qa__contact li::before {
+  content: "→ ";
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.rr-qa__contact a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rr-qa__contact a:hover {
+  opacity: 0.8;
+}

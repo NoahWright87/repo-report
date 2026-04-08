@@ -1,0 +1,10 @@
+.rr-chart-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: var(--spacing-sm);
+}
+
+.rr-chart-wrapper svg {
+  max-width: 100%;
+  height: auto;
+}

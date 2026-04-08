@@ -1,0 +1,90 @@
+/* Click gutters — fixed left/right edge overlays for slide navigation */
+
+.rr-gutter {
+  position: fixed;
+  top: 64px; /* below the sticky header */
+  bottom: 0;
+  width: 72px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 180ms ease;
+}
+
+.rr-gutter--left  { left: 0; }
+.rr-gutter--right { right: 0; }
+
+/* Clickable gutter */
+.rr-gutter:not(.rr-gutter--boundary) {
+  cursor: pointer;
+}
+
+/* Boundary gutter: hover still works for visual feedback, just no click */
+.rr-gutter--boundary {
+  cursor: default;
+}
+
+/* Hover gradients — use foreground color so it contrasts in both light and dark mode */
+.rr-gutter--left:not(.rr-gutter--boundary):hover {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--foreground) 12%, transparent),
+    transparent
+  );
+}
+
+.rr-gutter--right:not(.rr-gutter--boundary):hover {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--foreground) 12%, transparent),
+    transparent
+  );
+}
+
+/* Boundary hover: subtler, different-feeling overlay */
+.rr-gutter--left.rr-gutter--boundary:hover {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--foreground) 4%, transparent),
+    transparent
+  );
+}
+
+.rr-gutter--right.rr-gutter--boundary:hover {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--foreground) 4%, transparent),
+    transparent
+  );
+}
+
+/* Arrow */
+.rr-gutter__arrow {
+  font-size: 2.25rem;
+  line-height: 1;
+  color: var(--foreground);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+  transform: scale(0.85);
+  user-select: none;
+}
+
+/* Non-boundary: full arrow on hover */
+.rr-gutter:not(.rr-gutter--boundary):hover .rr-gutter__arrow {
+  opacity: 0.7;
+  transform: scale(1);
+}
+
+/* Boundary: muted arrow on hover */
+.rr-gutter--boundary:hover .rr-gutter__arrow {
+  opacity: 0.2;
+  transform: scale(1);
+}
+
+/* Hide gutters on narrow viewports */
+@media (max-width: 700px) {
+  .rr-gutter {
+    display: none;
+  }
+}
