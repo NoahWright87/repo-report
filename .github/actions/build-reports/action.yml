@@ -58,6 +58,7 @@ runs:
         if [ "$SRC" = "$DST" ]; then
           echo "Source and destination are the same directory — skipping copy (dogfooding mode)"
         else
+          rm -rf "$DST"
           mkdir -p "$DST"
           cp -r "$SRC/." "$DST/"
         fi
