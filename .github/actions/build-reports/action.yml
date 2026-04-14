@@ -1,0 +1,157 @@
+name: Build Reports
+description: >
+  Builds the repo-report React app with the provided sprint report JSON files
+  and writes static output to a configurable directory.
+
+inputs:
+  reports_path:
+    description: 'Path in the calling repo to the reports directory (containing subdirs with data.json files)'
+    required: false
+    default: 'docs/reports'
+  output_path:
+    description: 'Directory (relative to GITHUB_WORKSPACE) where built output is written'
+    required: false
+    default: '_site'
+  base_url:
+    description: 'Value for VITE_BASE_URL — the subpath the site is served from (e.g. /repo-report/)'
+    required: false
+    default: '/'
+  additional_static_dirs:
+    description: 'Comma-separated list of directories (relative to calling repo root) to copy into output unchanged'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+
+    # ── 1. Node setup ─────────────────────────────────────────────────────────
+    - name: Set up Node 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # ── 2. Clone design system as sibling of the checkout root ────────────────
+    # github.action_path = <workspace>/.github/actions/build-reports
+    # ../../../../       = parent of workspace  →  design lands as workspace sibling
+    - name: Clone design system
+      shell: bash
+      run: |
+        git clone --depth 1 https://github.com/NoahWright87/design.git \
+          "${{ github.action_path }}/../../../../design"
+
+    # ── 3. Build design system ────────────────────────────────────────────────
+    - name: Build design system
+      shell: bash
+      working-directory: ${{ github.action_path }}/../../../../design
+      run: npm ci && npm run build
+
+    # ── 4. Copy reports from calling repo into action's public/reports/ ───────
+    # The realpath guard handles the dogfooding case where repo-report deploys
+    # itself: reports_path=public/reports resolves to the same directory that
+    # the action would copy into, so we skip the copy entirely.
+    - name: Copy reports to build source
+      shell: bash
+      run: |
+        SRC="$(realpath "$GITHUB_WORKSPACE/${{ inputs.reports_path }}")"
+        DST="$(realpath "${{ github.action_path }}/../../../public/reports")"
+        if [ "$SRC" = "$DST" ]; then
+          echo "Source and destination are the same directory — skipping copy (dogfooding mode)"
+        else
+          mkdir -p "$DST"
+          cp -r "$SRC/." "$DST/"
+        fi
+
+    # ── 5. Auto-generate index.json if not already present ────────────────────
+    # Only runs when the copied reports don't already include an index.json.
+    # Reads all */data.json files, extracts meta.title / meta.dateRange /
+    # summary.stats, sorts newest-first by slug (lexicographic reverse), and
+    # writes { team, reports } where team comes from GITHUB_REPOSITORY.
+    - name: Auto-generate reports/index.json (if absent)
+      shell: bash
+      run: |
+        INDEX_PATH="${{ github.action_path }}/../../../public/reports/index.json"
+        if [ -f "$INDEX_PATH" ]; then
+          echo "index.json already present — skipping auto-generation"
+          exit 0
+        fi
+        node --input-type=module - "$INDEX_PATH" <<'EOF'
+        import { readdirSync, statSync, readFileSync, writeFileSync } from 'fs';
+        import { join, dirname } from 'path';
+
+        const indexPath = process.argv[2];
+        const reportsDir = dirname(indexPath);
+        const team = (process.env.GITHUB_REPOSITORY ?? 'unknown/repo').split('/')[1];
+
+        function hasDataJson(dir) {
+          try { statSync(join(dir, 'data.json')); return true; } catch { return false; }
+        }
+
+        const slugs = readdirSync(reportsDir).filter(name => {
+          try {
+            return statSync(join(reportsDir, name)).isDirectory() && hasDataJson(join(reportsDir, name));
+          } catch { return false; }
+        });
+
+        const reports = slugs
+          .map(slug => {
+            const raw = JSON.parse(readFileSync(join(reportsDir, slug, 'data.json'), 'utf-8'));
+            return {
+              slug,
+              title: raw?.meta?.title ?? slug,
+              dateRange: raw?.meta?.dateRange ?? { start: '', end: '' },
+              stats: raw?.summary?.stats ?? [],
+            };
+          })
+          .sort((a, b) => b.slug.localeCompare(a.slug));
+
+        writeFileSync(indexPath, JSON.stringify({ team, reports }, null, 2), 'utf-8');
+        console.log(`Generated index.json with ${reports.length} report(s) for team: ${team}`);
+        EOF
+
+    # ── 6. Install repo-report dependencies ───────────────────────────────────
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}/../../..
+      run: npm ci
+
+    # ── 7. Build the React app ────────────────────────────────────────────────
+    - name: Build
+      shell: bash
+      working-directory: ${{ github.action_path }}/../../..
+      env:
+        VITE_BASE_URL: ${{ inputs.base_url }}
+      run: npm run build
+
+    # ── 8. Copy built dist/ to the caller's output directory ──────────────────
+    - name: Copy dist to output path
+      shell: bash
+      run: |
+        mkdir -p "$GITHUB_WORKSPACE/${{ inputs.output_path }}"
+        cp -r "${{ github.action_path }}/../../../dist/." \
+              "$GITHUB_WORKSPACE/${{ inputs.output_path }}/"
+
+    # ── 9. Copy any additional static directories into the output ─────────────
+    # Splits on commas, strips surrounding whitespace, copies each dir from the
+    # calling repo root into output/<dirname>/.  Missing dirs are warned, not errored.
+    - name: Copy additional static directories
+      shell: bash
+      run: |
+        DIRS="${{ inputs.additional_static_dirs }}"
+        if [ -z "$DIRS" ]; then
+          exit 0
+        fi
+        IFS=',' read -ra DIR_ARRAY <<< "$DIRS"
+        for D in "${DIR_ARRAY[@]}"; do
+          D="$(echo "$D" | tr -d '[:space:]')"
+          [ -z "$D" ] && continue
+          SRC="$GITHUB_WORKSPACE/$D"
+          DEST="$GITHUB_WORKSPACE/${{ inputs.output_path }}/$D"
+          if [ -d "$SRC" ]; then
+            mkdir -p "$DEST"
+            cp -r "$SRC/." "$DEST/"
+            echo "Copied $D → output/$D"
+          else
+            echo "WARNING: additional_static_dirs entry '$D' does not exist — skipping"
+          fi
+        done
